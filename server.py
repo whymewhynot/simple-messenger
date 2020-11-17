@@ -26,16 +26,6 @@ def send():
     return Response(status=200)
 
 
-def filter_messages(messages, key, border):
-    filtered_messages = []
-
-    for message in messages:
-        if message[key] > border:
-            filtered_messages.append(message)
-
-    return filtered_messages
-
-
 @app.route("/messages")
 def get_messages():
     try:
@@ -46,15 +36,14 @@ def get_messages():
     with sqlite3.connect(app.config['DATABASE']) as conn:
         cursor = conn.cursor()
         try:
-            qs = "SELECT * FROM messages ORDER BY datetime DESC"
+            qs = f"SELECT * FROM messages WHERE datetime > {after} ORDER BY datetime DESC"
             response = cursor.execute(qs)
-            print('response = ', response)
+
             messages = [{'name': r[0], 'time': r[1], 'text': r[2]} for r in response]
         except:
             messages = []
 
-    filtered_messages = filter_messages(messages, "time", after)
-    return {"messages" : filtered_messages}
+    return {"messages" : messages}
 
 
 
